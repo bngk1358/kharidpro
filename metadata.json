@@ -1,0 +1,6 @@
+{
+  "name": "خرید پرو | KharidPro",
+  "description": "سامانه هوشمند مقایسه قیمت، کدهای تخفیف و راهنمای خرید آنلاین",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
