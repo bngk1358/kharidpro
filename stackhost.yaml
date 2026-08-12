@@ -6,4 +6,4 @@ commands:
   build:
     - "npm ci --no-audit --no-fund"
     - "npm run build"
-  start: "NODE_ENV=production npm run start"
+  start: "npm run start"
