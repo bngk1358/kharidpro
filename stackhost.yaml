@@ -5,5 +5,4 @@ commands:
   package: ""
   build:
     - "npm install"
-    - "npm run build"
-  start: "npm start"
+  start: "npm run start"
