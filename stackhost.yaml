@@ -4,6 +4,6 @@ runtime:
 commands:
   package: ""
   build:
-    - "npm install"
+    - "npm install --no-audit --no-fund"
     - "npm run build"
   start: "npm run start"
