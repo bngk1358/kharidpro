@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 
 async function startServer() {
   const app = express();
@@ -10,35 +9,43 @@ async function startServer() {
 
   // API Health Endpoint
   app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", name: "KharidPro Backend Service" });
+    res.json({
+      status: "ok",
+      name: "KharidPro Backend Service",
+    });
   });
 
   // Automatic SEO sitemap.xml route
   app.get("/sitemap.xml", (req, res) => {
-    const appUrl = process.env.APP_URL || "https://kharidpro.ir";
+    const appUrl =
+      process.env.APP_URL || "https://kharidpro.ir";
+
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${appUrl}/</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+
   <url>
     <loc>${appUrl}/products</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
+
   <url>
     <loc>${appUrl}/coupons</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
+
   <url>
     <loc>${appUrl}/articles</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -50,7 +57,9 @@ async function startServer() {
 
   // Automatic SEO robots.txt route
   app.get("/robots.txt", (req, res) => {
-    const appUrl = process.env.APP_URL || "https://kharidpro.ir";
+    const appUrl =
+      process.env.APP_URL || "https://kharidpro.ir";
+
     const robots = `User-agent: *
 Allow: /
 Disallow: /admin
@@ -61,23 +70,21 @@ Sitemap: ${appUrl}/sitemap.xml`;
     res.send(robots);
   });
 
-  // Vite middleware for development vs static production serving
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
+  // Serve Vite production build
+  const distPath = path.join(process.cwd(), "dist");
 
+  app.use(express.static(distPath));
+
+  // React SPA fallback
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(distPath, "index.html"));
+  });
+
+  // Start server
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`KharidPro server running on http://localhost:${PORT}`);
+    console.log(
+      `KharidPro server running on http://localhost:${PORT}`
+    );
   });
 }
 
