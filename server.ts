@@ -1,5 +1,8 @@
 import express from "express";
 import path from "path";
+import { checkDatabaseConnection } from "./src/server/db/connection";
+import { listCategories, listArticles, listCoupons, listStores, getSiteStats } from "./src/server/repositories/contentRepository";
+import { findProductById, listProducts } from "./src/server/repositories/productRepository";
 
 const app = express();
 
@@ -452,6 +455,84 @@ app.get("/api/health", (req, res) => {
     status: "ok",
     name: "KharidPro Backend Service",
   });
+});
+
+/* =========================================================
+   Read-only database API
+========================================================= */
+
+function sendDatabaseError(res: express.Response, error: unknown) {
+  console.error("Database API error:", error);
+  return res.status(503).json({
+    error: "Database is unavailable. Run migrations and seed data before using this endpoint.",
+  });
+}
+
+app.get("/api/products", async (req, res) => {
+  try {
+    return res.json(await listProducts());
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
+});
+
+app.get("/api/products/:id", async (req, res) => {
+  try {
+    const product = await findProductById(req.params.id);
+    return product ? res.json(product) : res.status(404).json({ error: "Product not found." });
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
+});
+
+app.get("/api/categories", async (req, res) => {
+  try {
+    return res.json(await listCategories());
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
+});
+
+app.get("/api/stores", async (req, res) => {
+  try {
+    return res.json(await listStores());
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
+});
+
+app.get("/api/coupons", async (req, res) => {
+  try {
+    return res.json(await listCoupons());
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
+});
+
+app.get("/api/articles", async (req, res) => {
+  try {
+    return res.json(await listArticles());
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
+});
+
+app.get("/api/stats", async (req, res) => {
+  try {
+    const stats = await getSiteStats();
+    return stats ? res.json(stats) : res.status(404).json({ error: "Site statistics not found." });
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
+});
+
+app.get("/api/database/health", async (req, res) => {
+  try {
+    await checkDatabaseConnection();
+    return res.json({ status: "ok" });
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
 });
 
 /* =========================================================
