@@ -16,6 +16,7 @@ async function startServer() {
    * Basic API health
    * ---------------------------------------------------------
    */
+
   app.get("/api/health", (_req, res) => {
     res.json({
       status: "ok",
@@ -25,9 +26,53 @@ async function startServer() {
 
   /*
    * ---------------------------------------------------------
+   * Backend routing test
+   * ---------------------------------------------------------
+   */
+
+  app.get("/api/test-backend", (_req, res) => {
+    res.json({
+      status: "ok",
+      message: "Backend routing works",
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  /*
+   * ---------------------------------------------------------
+   * Database connection test
+   * ---------------------------------------------------------
+   */
+
+  app.get("/api/db-test", async (_req, res) => {
+    try {
+      await checkDatabase();
+
+      res.json({
+        status: "ok",
+        database: "connected",
+        message: "Neon PostgreSQL connection works",
+      });
+    } catch (error) {
+      console.error("Database test failed:", error);
+
+      res.status(503).json({
+        status: "error",
+        database: "disconnected",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unknown database error",
+      });
+    }
+  });
+
+  /*
+   * ---------------------------------------------------------
    * Database health
    * ---------------------------------------------------------
    */
+
   app.get("/api/health/db", async (_req, res) => {
     try {
       await checkDatabase();
@@ -55,7 +100,9 @@ async function startServer() {
    * Product / Store / Category API
    * ---------------------------------------------------------
    *
-   * Routes include:
+   * Routes are mounted under /api
+   *
+   * Examples:
    *
    * GET    /api/products
    * GET    /api/products/:id
@@ -73,6 +120,7 @@ async function startServer() {
    * GET    /api/products/:id/price-history
    * POST   /api/products/:id/price-history
    */
+
   app.use("/api", productRoutes);
 
   /*
@@ -80,6 +128,7 @@ async function startServer() {
    * SEO sitemap
    * ---------------------------------------------------------
    */
+
   app.get("/sitemap.xml", (_req, res) => {
     const appUrl =
       process.env.APP_URL || "https://kharidpro.ir";
@@ -134,6 +183,7 @@ async function startServer() {
    * SEO robots.txt
    * ---------------------------------------------------------
    */
+
   app.get("/robots.txt", (_req, res) => {
     const appUrl =
       process.env.APP_URL || "https://kharidpro.ir";
@@ -157,6 +207,7 @@ Sitemap: ${appUrl}/sitemap.xml`;
    * Serve Vite production build
    * ---------------------------------------------------------
    */
+
   const distPath = path.join(
     process.cwd(),
     "dist"
@@ -168,7 +219,12 @@ Sitemap: ${appUrl}/sitemap.xml`;
    * ---------------------------------------------------------
    * React SPA fallback
    * ---------------------------------------------------------
+   *
+   * This must remain AFTER all API routes.
+   * Otherwise unknown API routes could return index.html.
+   * ---------------------------------------------------------
    */
+
   app.get("*", (_req, res) => {
     res.sendFile(
       path.join(distPath, "index.html")
@@ -177,9 +233,10 @@ Sitemap: ${appUrl}/sitemap.xml`;
 
   /*
    * ---------------------------------------------------------
-   * API error handler
+   * API / Server error handler
    * ---------------------------------------------------------
    */
+
   app.use(
     (
       error: unknown,
@@ -211,6 +268,7 @@ Sitemap: ${appUrl}/sitemap.xml`;
    * Start server
    * ---------------------------------------------------------
    */
+
   app.listen(
     PORT,
     "0.0.0.0",
